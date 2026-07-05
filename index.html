@@ -1,0 +1,1391 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Study Board">
+  <meta name="theme-color" content="#f3eadb">
+  <title>Study Board</title>
+  <style>
+    :root {
+      --bg: #f3eadb;
+      --paper: #fffaf1;
+      --paper-2: #fff4df;
+      --ink: #2f2a24;
+      --muted: #7a6d5f;
+      --line: #e2d2bb;
+      --green: #4f7f68;
+      --green-dark: #315d49;
+      --red: #b66a66;
+      --blue: #577f99;
+      --gold: #b7833b;
+      --clay: #a56548;
+      --shadow: 0 16px 40px rgba(67, 49, 28, 0.12);
+      --small-shadow: 0 8px 20px rgba(67, 49, 28, 0.08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        linear-gradient(rgba(120, 95, 62, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 95, 62, 0.045) 1px, transparent 1px),
+        var(--bg);
+      background-size: 32px 32px;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .app {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 20px clamp(14px, 3vw, 28px) 28px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0 16px;
+      background: rgba(243, 234, 219, 0.9);
+      backdrop-filter: blur(14px);
+    }
+
+    .eyebrow {
+      margin-bottom: 4px;
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .actions,
+    .mobile-tabs,
+    .metrics,
+    .panel-title,
+    .periods,
+    .subject-head,
+    .task,
+    .date-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .button,
+    .primary,
+    .danger,
+    .mini,
+    .tab,
+    .period,
+    .file-button {
+      min-height: 42px;
+      padding: 0 14px;
+      color: var(--ink);
+      background: #fff7ea;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.82) inset;
+      white-space: nowrap;
+    }
+
+    .button:active,
+    .primary:active,
+    .danger:active,
+    .mini:active,
+    .tab:active,
+    .period:active,
+    .file-button:active {
+      transform: translateY(1px);
+    }
+
+    .primary {
+      color: #fffdf8;
+      background: var(--green);
+      border-color: var(--green);
+      font-weight: 800;
+    }
+
+    .danger {
+      color: #85372e;
+      background: #fff1ea;
+      border-color: #e5b9aa;
+    }
+
+    .mini {
+      min-width: 38px;
+      min-height: 36px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .copy {
+      min-height: 36px;
+      padding: 0 10px;
+      color: var(--green-dark);
+      background: #edf5ef;
+      border: 1px solid #c8ddcf;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .file-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+      white-space: nowrap;
+    }
+
+    .mobile-tabs {
+      display: none;
+      gap: 8px;
+      padding: 4px;
+      margin-bottom: 12px;
+      background: rgba(255, 250, 241, 0.82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .tab {
+      flex: 1;
+      background: transparent;
+      box-shadow: none;
+      font-weight: 800;
+    }
+
+    .tab.active {
+      color: #fffdf8;
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: clamp(14px, 2.2vw, 20px);
+      background: rgba(255, 250, 241, 0.94);
+      border: 1px solid rgba(226, 210, 187, 0.94);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .today-panel {
+      position: sticky;
+      top: 96px;
+      max-height: calc(100svh - 116px);
+      overflow: auto;
+    }
+
+    .panel-head {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title h2 {
+      font-size: clamp(21px, 2.4vw, 30px);
+    }
+
+    .quiet {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .metrics {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .metric {
+      flex: 1 1 190px;
+      min-width: 0;
+      padding: 12px;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--small-shadow);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .metric-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .percent {
+      color: var(--ink);
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .bar {
+      position: relative;
+      height: 9px;
+      margin-top: 10px;
+      overflow: hidden;
+      background: #ecdec9;
+      border-radius: 999px;
+    }
+
+    .fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--p, 0%);
+      background: var(--green);
+      border-radius: inherit;
+    }
+
+    .form-line {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) minmax(120px, 0.7fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mini-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .input,
+    .textarea {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      outline: none;
+      font-size: 16px;
+    }
+
+    .textarea {
+      display: block;
+      min-height: 38px;
+      max-height: 160px;
+      overflow: hidden;
+      resize: none;
+      line-height: 1.35;
+    }
+
+    .input:focus,
+    .textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(79, 127, 104, 0.14);
+    }
+
+    .periods {
+      gap: 8px;
+      padding: 2px 0 8px;
+      margin: 4px 0 12px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .period {
+      min-width: 154px;
+      padding: 10px 12px;
+      text-align: left;
+      background: #fffaf1;
+    }
+
+    .period.active {
+      color: #fffdf8;
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+    }
+
+    .period b,
+    .period span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .period span {
+      margin-top: 3px;
+      opacity: 0.76;
+      font-size: 12px;
+    }
+
+    .period-edit {
+      display: grid;
+      grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+      padding: 12px;
+      margin-bottom: 14px;
+      background: rgba(255, 246, 230, 0.75);
+      border: 1px dashed #d9c7ac;
+      border-radius: var(--radius);
+    }
+
+    .label {
+      display: block;
+      margin: 0 0 5px 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .section-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(210px, 300px);
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .section-bar h3 {
+      font-size: 20px;
+    }
+
+    .subjects {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .subject {
+      min-width: 0;
+      padding: 13px;
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--green);
+      border-radius: var(--radius);
+      box-shadow: var(--small-shadow);
+    }
+
+    .subject.red { border-top-color: var(--red); }
+    .subject.blue { border-top-color: var(--blue); }
+    .subject.gold { border-top-color: var(--gold); }
+    .subject.clay { border-top-color: var(--clay); }
+
+    .subject-head {
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      flex: 0 0 12px;
+      border-radius: 99px;
+      background: var(--green);
+    }
+
+    .subject.red .dot { background: var(--red); }
+    .subject.blue .dot { background: var(--blue); }
+    .subject.gold .dot { background: var(--gold); }
+    .subject.clay .dot { background: var(--clay); }
+
+    .subject-name {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 6px;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      border-radius: var(--radius);
+      outline: none;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .subject-name:focus {
+      background: #fff7ea;
+      box-shadow: 0 0 0 2px rgba(79, 127, 104, 0.14);
+    }
+
+    .tasks,
+    .daily {
+      display: grid;
+      gap: 8px;
+      padding: 0;
+      margin: 12px 0 0;
+      list-style: none;
+    }
+
+    .daily {
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .task {
+      gap: 8px;
+      min-width: 0;
+      padding: 8px;
+      background: #fff8ed;
+      border: 1px solid #eadbc5;
+      border-radius: var(--radius);
+    }
+
+    .daily .task {
+      background: #fffdf8;
+    }
+
+    .task.done {
+      opacity: 0.68;
+    }
+
+    .task.done .textarea {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .check {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      cursor: pointer;
+    }
+
+    .check input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .mark {
+      width: 24px;
+      height: 24px;
+      background: #fffdf8;
+      border: 2px solid #c6b8a4;
+      border-radius: 7px;
+    }
+
+    .check input:checked + .mark {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .check input:checked + .mark::after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: 9px;
+      width: 6px;
+      height: 11px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .task-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .source {
+      display: inline-flex;
+      max-width: 100%;
+      margin-top: 5px;
+      padding: 3px 7px;
+      color: #5f4e3a;
+      background: #efe0c8;
+      border-radius: 999px;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .date-row {
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+
+    .date-row .input {
+      width: auto;
+      min-width: 176px;
+    }
+
+    .empty {
+      padding: 18px;
+      color: var(--muted);
+      background: rgba(255, 250, 241, 0.74);
+      border: 1px dashed #d9c7ac;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 40;
+      max-width: min(340px, calc(100vw - 36px));
+      padding: 12px 14px;
+      color: #fffdf8;
+      background: rgba(47, 42, 36, 0.92);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1180px) {
+      .subjects {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        padding-top: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .actions > * {
+        flex: 1;
+      }
+
+      .mobile-tabs {
+        display: flex;
+        position: sticky;
+        top: 94px;
+        z-index: 18;
+      }
+
+      .board {
+        display: block;
+      }
+
+      .panel {
+        display: none;
+      }
+
+      .board[data-view="macro"] .macro-panel,
+      .board[data-view="today"] .today-panel {
+        display: block;
+      }
+
+      .today-panel {
+        position: static;
+        max-height: none;
+      }
+
+      .form-line,
+      .period-edit,
+      .section-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .task {
+        align-items: flex-start;
+      }
+
+      .task-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .copy,
+      .task-actions .mini {
+        width: 100%;
+      }
+
+      .metric {
+        flex-basis: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Study Board</p>
+        <h1>공부 계획판</h1>
+      </div>
+      <div class="actions">
+        <button class="button" type="button" data-action="export">백업</button>
+        <label class="file-button" for="restoreFile">복원</label>
+        <input class="sr-only" id="restoreFile" type="file" accept="application/json" data-action="restore">
+      </div>
+    </header>
+
+    <nav class="mobile-tabs" aria-label="화면 전환">
+      <button class="tab" type="button" data-action="view" data-view="macro">큰 계획</button>
+      <button class="tab" type="button" data-action="view" data-view="today">오늘 계획</button>
+    </nav>
+
+    <main class="board" id="board" data-view="macro">
+      <section class="panel macro-panel" id="macroPanel" aria-label="큰 계획"></section>
+      <aside class="panel today-panel" id="todayPanel" aria-label="오늘 계획"></aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const KEY = "study-board-safari-v1";
+      const COLORS = ["green", "red", "blue", "gold", "clay"];
+      const macroPanel = document.querySelector("#macroPanel");
+      const todayPanel = document.querySelector("#todayPanel");
+      const board = document.querySelector("#board");
+      const toast = document.querySelector("#toast");
+      let toastTimer = 0;
+      let state = load();
+
+      function id(prefix) {
+        return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function todayISO() {
+        const now = new Date();
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 10);
+      }
+
+      function task(text, done = false, source = null) {
+        return { id: id("task"), text, done, source, createdAt: Date.now() };
+      }
+
+      function sampleState() {
+        const today = todayISO();
+        const p1 = {
+          id: id("period"),
+          title: "7월 계획",
+          note: "기본기와 약점 정리",
+          subjects: [
+            { id: id("subject"), name: "국어", color: "red", tasks: [task("문학 기출 20지문 복습"), task("비문학 오답 선지 정리")] },
+            { id: id("subject"), name: "수학", color: "green", tasks: [task("수열 유형 30문제"), task("미적분 약점 노트 보완")] },
+            { id: id("subject"), name: "영어", color: "blue", tasks: [task("빈칸 추론 2회분"), task("단어장 누적 복습")] }
+          ]
+        };
+        const p2 = {
+          id: id("period"),
+          title: "9평 전 계획",
+          note: "실전 감각 만들기",
+          subjects: [
+            { id: id("subject"), name: "탐구", color: "gold", tasks: [task("개념 빈칸 점검"), task("실전 모의고사 3회")] }
+          ]
+        };
+        return {
+          version: 1,
+          view: "macro",
+          date: today,
+          selectedPeriodId: p1.id,
+          periods: [p1, p2],
+          daily: {
+            [today]: { tasks: [task("오전 영어 단어 40개"), task("저녁 오답노트 정리")] }
+          }
+        };
+      }
+
+      function load() {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return sampleState();
+        try {
+          return normalize(JSON.parse(raw));
+        } catch (error) {
+          console.warn(error);
+          return sampleState();
+        }
+      }
+
+      function normalize(data) {
+        const next = {
+          version: 1,
+          view: data && data.view === "today" ? "today" : "macro",
+          date: isDate(data && data.date) ? data.date : todayISO(),
+          selectedPeriodId: typeof (data && data.selectedPeriodId) === "string" ? data.selectedPeriodId : null,
+          periods: Array.isArray(data && data.periods) ? data.periods.map(normalizePeriod).filter(Boolean) : [],
+          daily: {}
+        };
+        if (data && data.daily && typeof data.daily === "object") {
+          Object.entries(data.daily).forEach(([date, plan]) => {
+            if (!isDate(date)) return;
+            next.daily[date] = { tasks: Array.isArray(plan && plan.tasks) ? plan.tasks.map(normalizeTask).filter(Boolean) : [] };
+          });
+        }
+        if (!next.periods.some((period) => period.id === next.selectedPeriodId)) {
+          next.selectedPeriodId = next.periods[0] ? next.periods[0].id : null;
+        }
+        if (!next.daily[next.date]) next.daily[next.date] = { tasks: [] };
+        return next;
+      }
+
+      function normalizePeriod(period) {
+        if (!period || typeof period !== "object") return null;
+        return {
+          id: typeof period.id === "string" ? period.id : id("period"),
+          title: clean(period.title) || "새 기간",
+          note: clean(period.note),
+          subjects: Array.isArray(period.subjects) ? period.subjects.map(normalizeSubject).filter(Boolean) : []
+        };
+      }
+
+      function normalizeSubject(subject) {
+        if (!subject || typeof subject !== "object") return null;
+        return {
+          id: typeof subject.id === "string" ? subject.id : id("subject"),
+          name: clean(subject.name) || "새 과목",
+          color: COLORS.includes(subject.color) ? subject.color : "green",
+          tasks: Array.isArray(subject.tasks) ? subject.tasks.map(normalizeTask).filter(Boolean) : []
+        };
+      }
+
+      function normalizeTask(item) {
+        if (!item || typeof item !== "object") return null;
+        return {
+          id: typeof item.id === "string" ? item.id : id("task"),
+          text: clean(item.text) || "새 할 일",
+          done: Boolean(item.done),
+          source: item.source && typeof item.source === "object" ? {
+            periodTitle: clean(item.source.periodTitle),
+            subjectName: clean(item.source.subjectName),
+            originalTaskId: clean(item.source.originalTaskId)
+          } : null,
+          createdAt: Number.isFinite(item.createdAt) ? item.createdAt : Date.now()
+        };
+      }
+
+      function clean(value) {
+        return typeof value === "string" ? value.trim() : "";
+      }
+
+      function isDate(value) {
+        return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(state));
+        } catch (error) {
+          console.warn(error);
+          showToast("저장 공간을 확인해 주세요.");
+        }
+      }
+
+      function selectedPeriod() {
+        return state.periods.find((period) => period.id === state.selectedPeriodId) || null;
+      }
+
+      function dailyPlan(date = state.date) {
+        if (!state.daily[date]) state.daily[date] = { tasks: [] };
+        return state.daily[date];
+      }
+
+      function progress(tasks) {
+        const total = tasks.length;
+        const done = tasks.filter((item) => item.done).length;
+        return { total, done, percent: total ? Math.round((done / total) * 100) : 0 };
+      }
+
+      function periodProgress(period) {
+        return progress(period ? period.subjects.flatMap((subject) => subject.tasks) : []);
+      }
+
+      function allProgress() {
+        return progress(state.periods.flatMap((period) => period.subjects.flatMap((subject) => subject.tasks)));
+      }
+
+      function render() {
+        const period = selectedPeriod();
+        board.dataset.view = state.view;
+        macroPanel.innerHTML = renderMacro(period);
+        todayPanel.innerHTML = renderToday();
+        document.querySelectorAll("[data-action='view']").forEach((button) => {
+          button.classList.toggle("active", button.dataset.view === state.view);
+        });
+        sizeTextareas();
+      }
+
+      function renderMacro(period) {
+        const whole = allProgress();
+        const current = periodProgress(period);
+        return `
+          <div class="panel-head">
+            <div class="panel-title">
+              <div>
+                <h2>큰 계획</h2>
+                <p class="quiet">기간별 목표와 과목별 할 일을 따로 봅니다.</p>
+              </div>
+            </div>
+            <div class="metrics">
+              ${metric("전체 진행률", whole)}
+              ${metric(period ? `${esc(period.title)} 진행률` : "기간 진행률", current)}
+            </div>
+            <form class="form-line" data-form="period">
+              <input class="input" name="title" autocomplete="off" placeholder="새 기간 이름">
+              <input class="input" name="note" autocomplete="off" placeholder="메모">
+              <button class="primary" type="submit">기간 추가</button>
+            </form>
+          </div>
+          ${renderPeriods()}
+          ${period ? renderPeriod(period) : empty("기간이 비어 있어요.")}
+        `;
+      }
+
+      function metric(label, item) {
+        return `
+          <div class="metric">
+            <strong>${label}</strong>
+            <div class="metric-line">
+              <span class="percent">${item.percent}%</span>
+              <span>${item.done}/${item.total} 완료</span>
+            </div>
+            <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${item.percent}">
+              <span class="fill" style="--p:${item.percent}%"></span>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderPeriods() {
+        if (!state.periods.length) return "";
+        return `
+          <div class="periods" aria-label="기간 목록">
+            ${state.periods.map((period) => {
+              const p = periodProgress(period);
+              return `
+                <button class="period ${period.id === state.selectedPeriodId ? "active" : ""}" type="button" data-action="select-period" data-period-id="${period.id}">
+                  <b>${esc(period.title)}</b>
+                  <span>${p.percent}% · ${p.done}/${p.total}</span>
+                </button>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      function renderPeriod(period) {
+        return `
+          <div class="period-edit">
+            <label>
+              <span class="label">기간 이름</span>
+              <input class="input" value="${attr(period.title)}" data-edit="period-title" data-period-id="${period.id}">
+            </label>
+            <label>
+              <span class="label">메모</span>
+              <input class="input" value="${attr(period.note)}" data-edit="period-note" data-period-id="${period.id}">
+            </label>
+            <button class="danger" type="button" data-action="delete-period" data-period-id="${period.id}">기간 삭제</button>
+          </div>
+          <div class="section-bar">
+            <div>
+              <h3>과목별 카드</h3>
+              <p class="quiet">${period.subjects.length}개 과목</p>
+            </div>
+            <form class="mini-form" data-form="subject">
+              <input class="input" name="name" autocomplete="off" placeholder="새 과목">
+              <button class="primary" type="submit">추가</button>
+            </form>
+          </div>
+          ${period.subjects.length ? `<div class="subjects">${period.subjects.map(renderSubject).join("")}</div>` : empty("과목 카드가 비어 있어요.")}
+        `;
+      }
+
+      function renderSubject(subject) {
+        const p = progress(subject.tasks);
+        return `
+          <article class="subject ${subject.color}">
+            <header class="subject-head">
+              <span class="dot" aria-hidden="true"></span>
+              <input class="subject-name" value="${attr(subject.name)}" data-edit="subject-name" data-subject-id="${subject.id}" aria-label="과목 이름">
+              <button class="mini" type="button" data-action="delete-subject" data-subject-id="${subject.id}" aria-label="과목 삭제">삭제</button>
+            </header>
+            <div class="metric-line">
+              <span>${p.done}/${p.total} 완료</span>
+              <span>${p.percent}%</span>
+            </div>
+            <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p.percent}">
+              <span class="fill" style="--p:${p.percent}%"></span>
+            </div>
+            ${subject.tasks.length ? `<ul class="tasks">${subject.tasks.map(renderMacroTask).join("")}</ul>` : empty("할 일이 비어 있어요.")}
+            <form class="mini-form" data-form="macro-task" data-subject-id="${subject.id}">
+              <input class="input" name="text" autocomplete="off" placeholder="할 일 추가">
+              <button class="primary" type="submit">추가</button>
+            </form>
+          </article>
+        `;
+      }
+
+      function renderMacroTask(item) {
+        return `
+          <li class="task ${item.done ? "done" : ""}">
+            <label class="check" aria-label="완료 여부">
+              <input type="checkbox" data-action="toggle-macro" data-task-id="${item.id}" ${item.done ? "checked" : ""}>
+              <span class="mark"></span>
+            </label>
+            <div class="task-main">
+              <textarea class="textarea" rows="1" data-edit="macro-text" data-task-id="${item.id}" aria-label="큰 계획 할 일">${esc(item.text)}</textarea>
+            </div>
+            <div class="task-actions">
+              <button class="copy" type="button" data-action="copy-today" data-task-id="${item.id}">오늘 하기</button>
+              <button class="mini" type="button" data-action="delete-macro" data-task-id="${item.id}" aria-label="할 일 삭제">삭제</button>
+            </div>
+          </li>
+        `;
+      }
+
+      function renderToday() {
+        const plan = dailyPlan();
+        const p = progress(plan.tasks);
+        return `
+          <div class="panel-head">
+            <div class="panel-title">
+              <div>
+                <h2>오늘 계획</h2>
+                <p class="quiet">${dateLabel(state.date)}</p>
+              </div>
+            </div>
+            ${metric("일별 진행률", p)}
+            <div class="date-row">
+              <input class="input" type="date" value="${state.date}" data-action="date">
+              <button class="button" type="button" data-action="today">오늘</button>
+            </div>
+            <form class="mini-form" data-form="daily-task">
+              <input class="input" name="text" autocomplete="off" placeholder="오늘 할 일">
+              <button class="primary" type="submit">추가</button>
+            </form>
+          </div>
+          ${plan.tasks.length ? `<ul class="daily">${plan.tasks.map(renderDailyTask).join("")}</ul>` : empty("오늘 계획이 비어 있어요.")}
+        `;
+      }
+
+      function renderDailyTask(item) {
+        const source = item.source && (item.source.periodTitle || item.source.subjectName)
+          ? `<span class="source">${esc([item.source.periodTitle, item.source.subjectName].filter(Boolean).join(" · "))}</span>`
+          : "";
+        return `
+          <li class="task ${item.done ? "done" : ""}">
+            <label class="check" aria-label="완료 여부">
+              <input type="checkbox" data-action="toggle-daily" data-task-id="${item.id}" ${item.done ? "checked" : ""}>
+              <span class="mark"></span>
+            </label>
+            <div class="task-main">
+              <textarea class="textarea" rows="1" data-edit="daily-text" data-task-id="${item.id}" aria-label="일별 할 일">${esc(item.text)}</textarea>
+              ${source}
+            </div>
+            <div class="task-actions">
+              <button class="mini" type="button" data-action="delete-daily" data-task-id="${item.id}" aria-label="할 일 삭제">삭제</button>
+            </div>
+          </li>
+        `;
+      }
+
+      function empty(message) {
+        return `<div class="empty">${message}</div>`;
+      }
+
+      function onSubmit(event) {
+        const form = event.target.closest("form[data-form]");
+        if (!form) return;
+        event.preventDefault();
+
+        if (form.dataset.form === "period") {
+          const title = clean(form.elements.title.value);
+          if (!title) return showToast("기간 이름을 입력해 주세요.");
+          const period = { id: id("period"), title, note: clean(form.elements.note.value), subjects: [] };
+          state.periods.push(period);
+          state.selectedPeriodId = period.id;
+          form.reset();
+          commit("기간을 추가했어요.");
+        }
+
+        if (form.dataset.form === "subject") {
+          const period = selectedPeriod();
+          const name = clean(form.elements.name.value);
+          if (!period || !name) return showToast("과목 이름을 입력해 주세요.");
+          period.subjects.push({
+            id: id("subject"),
+            name,
+            color: COLORS[period.subjects.length % COLORS.length],
+            tasks: []
+          });
+          form.reset();
+          commit("과목을 추가했어요.");
+        }
+
+        if (form.dataset.form === "macro-task") {
+          const subject = findSubject(form.dataset.subjectId);
+          const text = clean(form.elements.text.value);
+          if (!subject || !text) return showToast("할 일을 입력해 주세요.");
+          subject.tasks.push(task(text));
+          form.reset();
+          commit("큰 계획에 추가했어요.");
+        }
+
+        if (form.dataset.form === "daily-task") {
+          const text = clean(form.elements.text.value);
+          if (!text) return showToast("할 일을 입력해 주세요.");
+          dailyPlan().tasks.push(task(text));
+          form.reset();
+          commit("일별 계획에 추가했어요.");
+        }
+      }
+
+      function onClick(event) {
+        const target = event.target.closest("[data-action]");
+        if (!target) return;
+        const action = target.dataset.action;
+
+        if (action === "view") {
+          state.view = target.dataset.view === "today" ? "today" : "macro";
+          commit();
+        }
+
+        if (action === "select-period") {
+          state.selectedPeriodId = target.dataset.periodId;
+          commit();
+        }
+
+        if (action === "today") {
+          state.date = todayISO();
+          dailyPlan();
+          commit();
+        }
+
+        if (action === "copy-today") copyToToday(target.dataset.taskId);
+        if (action === "delete-period") deletePeriod(target.dataset.periodId);
+        if (action === "delete-subject") deleteSubject(target.dataset.subjectId);
+        if (action === "delete-macro") deleteMacroTask(target.dataset.taskId);
+        if (action === "delete-daily") deleteDailyTask(target.dataset.taskId);
+        if (action === "export") exportBackup();
+      }
+
+      function onChange(event) {
+        const target = event.target;
+        const action = target.dataset.action;
+
+        if (action === "toggle-macro") {
+          const found = findMacroTask(target.dataset.taskId);
+          if (!found) return;
+          found.task.done = target.checked;
+          commit();
+        }
+
+        if (action === "toggle-daily") {
+          const found = findDailyTask(target.dataset.taskId);
+          if (!found) return;
+          found.done = target.checked;
+          commit();
+        }
+
+        if (action === "date") {
+          state.date = isDate(target.value) ? target.value : todayISO();
+          dailyPlan();
+          commit();
+        }
+
+        if (action === "restore") {
+          restoreBackup(target.files && target.files[0]);
+          target.value = "";
+        }
+      }
+
+      function onInput(event) {
+        const target = event.target;
+        const edit = target.dataset.edit;
+        if (!edit) return;
+
+        if (edit === "period-title" || edit === "period-note") {
+          const period = state.periods.find((item) => item.id === target.dataset.periodId);
+          if (!period) return;
+          period[edit === "period-title" ? "title" : "note"] = clean(target.value);
+        }
+
+        if (edit === "subject-name") {
+          const subject = findSubject(target.dataset.subjectId);
+          if (!subject) return;
+          subject.name = clean(target.value) || "새 과목";
+        }
+
+        if (edit === "macro-text") {
+          const found = findMacroTask(target.dataset.taskId);
+          if (!found) return;
+          found.task.text = clean(target.value) || "새 할 일";
+          sizeTextarea(target);
+        }
+
+        if (edit === "daily-text") {
+          const found = findDailyTask(target.dataset.taskId);
+          if (!found) return;
+          found.text = clean(target.value) || "새 할 일";
+          sizeTextarea(target);
+        }
+
+        save();
+      }
+
+      function onBlur(event) {
+        if (event.target.dataset.edit) render();
+      }
+
+      function findSubject(subjectId) {
+        for (const period of state.periods) {
+          const found = period.subjects.find((subject) => subject.id === subjectId);
+          if (found) return found;
+        }
+        return null;
+      }
+
+      function findMacroTask(taskId) {
+        for (const period of state.periods) {
+          for (const subject of period.subjects) {
+            const found = subject.tasks.find((item) => item.id === taskId);
+            if (found) return { period, subject, task: found };
+          }
+        }
+        return null;
+      }
+
+      function findDailyTask(taskId) {
+        return dailyPlan().tasks.find((item) => item.id === taskId) || null;
+      }
+
+      function copyToToday(taskId) {
+        const found = findMacroTask(taskId);
+        if (!found) return;
+        const today = todayISO();
+        state.date = today;
+        dailyPlan(today).tasks.push(task(found.task.text, false, {
+          periodTitle: found.period.title,
+          subjectName: found.subject.name,
+          originalTaskId: found.task.id
+        }));
+        if (window.matchMedia("(max-width: 860px)").matches) state.view = "today";
+        commit("오늘 계획으로 복사했어요.");
+      }
+
+      function deletePeriod(periodId) {
+        const period = state.periods.find((item) => item.id === periodId);
+        if (!period || !confirm(`"${period.title}" 기간을 삭제할까요?`)) return;
+        state.periods = state.periods.filter((item) => item.id !== periodId);
+        state.selectedPeriodId = state.periods[0] ? state.periods[0].id : null;
+        commit("기간을 삭제했어요.");
+      }
+
+      function deleteSubject(subjectId) {
+        const period = selectedPeriod();
+        if (!period) return;
+        const subject = period.subjects.find((item) => item.id === subjectId);
+        if (!subject || !confirm(`"${subject.name}" 과목을 삭제할까요?`)) return;
+        period.subjects = period.subjects.filter((item) => item.id !== subjectId);
+        commit("과목을 삭제했어요.");
+      }
+
+      function deleteMacroTask(taskId) {
+        const found = findMacroTask(taskId);
+        if (!found) return;
+        found.subject.tasks = found.subject.tasks.filter((item) => item.id !== taskId);
+        commit("큰 계획에서 삭제했어요.");
+      }
+
+      function deleteDailyTask(taskId) {
+        const plan = dailyPlan();
+        plan.tasks = plan.tasks.filter((item) => item.id !== taskId);
+        commit("일별 계획에서 삭제했어요.");
+      }
+
+      function exportBackup() {
+        const blob = new Blob([JSON.stringify({ ...state, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `study-board-backup-${todayISO()}.json`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("백업 파일을 만들었어요.");
+      }
+
+      function restoreBackup(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const restored = normalize(JSON.parse(String(reader.result || "{}")));
+            if (!confirm("현재 계획을 복원 파일로 바꿀까요?")) return;
+            state = restored;
+            commit("복원했어요.");
+          } catch (error) {
+            console.warn(error);
+            showToast("복원 파일을 확인해 주세요.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function commit(message) {
+        save();
+        render();
+        if (message) showToast(message);
+      }
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add("show");
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      function dateLabel(value) {
+        const [year, month, day] = value.split("-").map(Number);
+        const date = new Date(year, month - 1, day);
+        return new Intl.DateTimeFormat("ko-KR", {
+          month: "long",
+          day: "numeric",
+          weekday: "long"
+        }).format(date);
+      }
+
+      function sizeTextareas() {
+        document.querySelectorAll("textarea").forEach(sizeTextarea);
+      }
+
+      function sizeTextarea(textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
+
+      function esc(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function attr(value) {
+        return esc(value).replaceAll("`", "&#096;");
+      }
+
+      document.addEventListener("submit", onSubmit);
+      document.addEventListener("click", onClick);
+      document.addEventListener("change", onChange);
+      document.addEventListener("input", onInput);
+      document.addEventListener("blur", onBlur, true);
+      window.addEventListener("resize", sizeTextareas);
+
+      render();
+    })();
+  </script>
+</body>
+</html>
